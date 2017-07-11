@@ -12,9 +12,6 @@ import Control.Monad (mzero, MonadPlus)
 import Control.Applicative ((<|>))
 import System.Environment (getArgs, getEnv)
 
-liftEither :: Either String a -> IO a
-liftEither = either fail return
-
 main :: IO ()
 main = do
   apiKey <- (T.pack <$> getEnv "OCTOPART_API_KEY")
