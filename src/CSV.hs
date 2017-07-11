@@ -26,8 +26,6 @@ import Data.Char (ord)
 -- little to be gained by signaling errors.
 --
 
-import qualified Data.ByteString.Char8 as C8
-
 parse :: B.ByteString -> [[B.ByteString]]
 parse inp = reverse $ tidy $ currentLines $ addCurrentLine $
               B.foldl'
