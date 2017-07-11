@@ -3,5 +3,6 @@ extra-package-dbs: []
 packages:
 - '.'
 extra-deps:
+- aeson-1.2.1.0
 - req-0.3.0
 resolver: lts-8.22
