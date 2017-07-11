@@ -48,13 +48,13 @@ instance R.MonadHttp IO where
 
 queryMpns :: T.Text -> [T.Text] -> IO (R.JsonResponse Responses)
 queryMpns apiKey mpns =
-    R.req
-      R.GET
-      (R.https (T.pack "octopart.com") /: (T.pack "api") /: (T.pack "v3") /: (T.pack "parts") /: (T.pack "match"))
-      R.NoReqBody
-      R.jsonResponse
-      ((T.pack "queries") =: (mpnsToJsonQueryText mpns) <>
-       (T.pack "apikey") =: apiKey)
+  R.req
+    R.GET
+    (R.https (T.pack "octopart.com") /: (T.pack "api") /: (T.pack "v3") /: (T.pack "parts") /: (T.pack "match"))
+    R.NoReqBody
+    R.jsonResponse
+    ((T.pack "queries") =: (mpnsToJsonQueryText mpns) <>
+     (T.pack "apikey") =: apiKey)
 
 liftMaybe :: (MonadPlus m) => Maybe a -> m a
 liftMaybe = maybe mzero return
