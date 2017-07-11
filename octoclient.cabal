@@ -19,3 +19,15 @@ executable octoclient
   default-language:    Haskell2010
   build-depends:       base >= 4.7 && < 5
                      , req == 0.3.0
+
+Test-Suite test-csv
+  type:               exitcode-stdio-1.0
+  main-is:            TestCSV.hs
+  other-modules:      CSV
+  hs-source-dirs:     test, src
+  build-depends:      base >=4.7
+                    , test-framework
+                    , test-framework-hunit
+                    , HUnit
+                    , containers == 0.5.*
+                    , bytestring >= 0.10
