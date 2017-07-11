@@ -27,17 +27,18 @@ import Data.Char (ord)
 --
 
 parse :: B.ByteString -> [[B.ByteString]]
-parse inp = reverse $ tidy $ currentLines $ addCurrentLine $
-              B.foldl'
-                parse'
-                (State {
-                   currentField = [ ],
-                   currentLine = [ ],
-                   currentLines = [ ],
-                   afterQuote = False, -- We have just read '"', which may or may not be escaped by a subsequent '"'
-                   inQuoted = False    -- The parser is currently within a quoted string
-                })
-                inp
+parse inp =
+  reverse $ tidy $ currentLines $ addCurrentLine $
+    B.foldl'
+      parse'
+      (State {
+        currentField = [ ],
+        currentLine = [ ],
+        currentLines = [ ],
+        afterQuote = False, -- We have just read '"', which may or may not be escaped by a subsequent '"'
+        inQuoted = False    -- The parser is currently within a quoted string
+      })
+      inp
 
 cr :: Word8
 cr = fromIntegral (ord '\r')
@@ -58,16 +59,18 @@ tidy ls@([bs]:rest)
 tidy xs = xs
 
 addCurrentField :: State -> State
-addCurrentField s = s {
-                      currentField = [ ],
-                      currentLine = (B.pack (reverse (currentField s))) : (currentLine s)
-                    }
+addCurrentField s =
+  s {
+    currentField = [ ],
+    currentLine = (B.pack (reverse (currentField s))) : (currentLine s)
+  }
 
 addCurrentLine :: State -> State
-addCurrentLine s = s' {
-                     currentLines = (reverse (currentLine s')) : (currentLines s'),
-                     currentLine = [ ]
-                   } where s' = addCurrentField s
+addCurrentLine s =
+  s' {
+    currentLines = (reverse (currentLine s')) : (currentLines s'),
+    currentLine = [ ]
+  } where s' = addCurrentField s
 
 addChar :: Word8 -> State -> State
 addChar c s = s { currentField = c : (currentField s) }
@@ -95,9 +98,9 @@ parse' s c
   | True = addChar c s
 
 data State = State {
-    currentField :: [Word8],
-    currentLine :: [B.ByteString],
-    currentLines :: [[B.ByteString]],
-    afterQuote :: Bool,
-    inQuoted :: Bool
+  currentField :: [Word8],
+  currentLine :: [B.ByteString],
+  currentLines :: [[B.ByteString]],
+  afterQuote :: Bool,
+  inQuoted :: Bool
 } deriving Show
