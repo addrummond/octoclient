@@ -62,8 +62,7 @@ liftMaybe = maybe mzero return
 offer :: T.Text -> Value -> Parser Offer
 offer seller = withArray "offer" $ \o -> do
   quantity <- (liftMaybe $ o !? 0) >>= (withScientific "quantity" (liftMaybe . toBoundedInteger))
-  price <- (liftMaybe $ o !? 1) >>= (withText "price" return)
-  price <- liftMaybe ((readMaybe (T.unpack price)) :: Maybe Scientific)
+  price <- (liftMaybe $ o !? 1) >>= (withText "price" (liftMaybe . readMaybe . T.unpack))
   return $ Offer { quantity = quantity, priceUSD = price, seller = seller }
 
 offerFieldToOffers :: Value -> Parser (V.Vector Offer)
@@ -75,7 +74,6 @@ offerFieldToOffers = withObject "offers" $ \o -> do
   case usd of
     Nothing -> return V.empty
     Just usd -> do
-      usd <- withArray "USD" return usd
       seller <- o .: (T.pack "seller")
       name <- seller .: (T.pack "name")
       mapM (offer name) usd
