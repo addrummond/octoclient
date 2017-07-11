@@ -3,12 +3,8 @@ module Main where
 import qualified CSV
 import qualified Octopart as O
 import qualified Data.Text as T
-import qualified Data.Aeson as A
-import qualified Data.Aeson.Parser as AP
-import qualified Data.Aeson.Types as AT
 import Control.Exception (throw)
 import Network.HTTP.Req (responseBody)
-import Control.Monad (mzero, MonadPlus)
 import Control.Applicative ((<|>))
 import System.Environment (getArgs, getEnv)
 
