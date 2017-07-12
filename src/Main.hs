@@ -54,14 +54,14 @@ main = do
 
   -- Find the best price for the total order (taking into account batch size).
   bestPrice <-
-    return $ sum $ map (fst . (V.foldl' (sumPrices batchSize) (0.0, bomLines))) responses
+    return $ sum $ map (fst . (V.foldl' (sumBestPrices batchSize) (0.0, bomLines))) responses
 
   -- Output the total and BOM coverage.
   fprint ((fixed 2) % string % (fixed 1) % string) bestPrice " USD\nBOM coverage: " coverage "%\n"
 
-sumPrices :: Int -> (Scientific, [BOM.BomLine]) -> V.Vector O.Offer -> (Scientific, [BOM.BomLine])
-sumPrices batchSize x@(_, []) _ = x
-sumPrices batchSize (total, line:rest) offers =
+sumBestPrices :: Int -> (Scientific, [BOM.BomLine]) -> V.Vector O.Offer -> (Scientific, [BOM.BomLine])
+sumBestPrices batchSize x@(_, []) _ = x
+sumBestPrices batchSize (total, line:rest) offers =
   (total + total', rest)
   where 
     total' = (bestTotalPrice (quantity * batchSize) offers) *
