@@ -8,3 +8,11 @@ Some implementation decisions:
   coverage.
 * I wrote a CSV parser as an exercise. In production code
   I would use an existing library.
+
+Build:
+
+    stack build
+
+Run:
+
+    OCTOPART_API_KEY=aaaaaaaa ./.stack-work/install/**/bin/octoclient bom.csv 10
