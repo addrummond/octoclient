@@ -28,6 +28,7 @@ executable octoclient
                      , extra >= 1.5
                      , vector-algorithms >= 0.7
                      , formatting >= 6.2
+                     , bytestring-tree-builder >= 0.2.7
 
 Test-Suite test-csv
   type:               exitcode-stdio-1.0

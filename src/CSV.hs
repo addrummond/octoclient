@@ -7,6 +7,8 @@
 module CSV (parse) where
 
 import qualified Data.ByteString as B
+import qualified ByteString.TreeBuilder as BB
+import Data.Monoid (mempty)
 import Data.Word (Word8)
 import Data.Char (ord)
 
@@ -14,14 +16,13 @@ import Data.Char (ord)
 -- chars relevant to CSV parsing are ASCII, it's not necessary to do
 -- a full UTF-8 decoding step.
 --
--- This parser is reasonably efficient as is implemented as a strict left fold
--- over the sequence of bytes in the input ByteString. However, it stores
--- intermediate values using lists rather than mutable state, so there is
--- likely to be some room for improvement with regard to performance.
+-- The parser is is implemented as a strict left fold over the sequence of bytes
+-- in the input ByteString. It uses ByteString.TreeBuilder to build the byte
+-- strings for individual fields.
 --
 -- The parser assumes that the input is well-formed, and is permissive
--- in what it accepts. It is possible for a strings not to be valid CSV (e.g.
--- the RFC does not allow unquoted whitespace within fields). However, in
+-- in what it accepts. It is possible in principle for a string not to be valid
+-- CSV (e.g. the RFC does not allow unquoted whitespace within fields). However, in
 -- practice, so many CSV files violate these sorts of constraints that there is
 -- little to be gained by signaling errors.
 --
@@ -32,7 +33,7 @@ parse inp =
     B.foldl'
       parse'
       (State {
-        currentField = [ ],
+        currentField = mempty,
         currentLine = [ ],
         currentLines = [ ],
         afterQuote = False, -- We have just read '"', which may or may not be escaped by a subsequent '"'
@@ -66,8 +67,8 @@ tidy xs = xs
 addCurrentField :: State -> State
 addCurrentField s =
   s {
-    currentField = [ ],
-    currentLine = (B.pack (reverse (currentField s))) : (currentLine s)
+    currentField = mempty,
+    currentLine = (BB.toByteString (currentField s)) : (currentLine s)
   }
 
 addCurrentLine :: State -> State
@@ -78,7 +79,7 @@ addCurrentLine s =
   } where s' = addCurrentField s
 
 addChar :: Word8 -> State -> State
-addChar c s = s { currentField = c : (currentField s) }
+addChar c s = s { currentField = mappend (currentField s) (BB.byte c) }
 
 parse' :: State -> Word8 -> State
 parse' s c
@@ -107,10 +108,10 @@ parse' s c
   | True = addChar c s
 
 data State = State {
-  currentField :: [Word8],
+  currentField :: BB.Builder,
   currentLine :: [B.ByteString],
   currentLines :: [[B.ByteString]],
   afterQuote :: Bool,
   inQuoted :: Bool,
   afterComma :: Bool
-} deriving Show
+}
