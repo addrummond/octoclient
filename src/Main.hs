@@ -5,7 +5,6 @@ import qualified Octopart as O
 import qualified Data.Text as T
 import qualified Data.ByteString as B
 import qualified Data.Vector as V
-import qualified Data.Vector.Algorithms.Merge as VA
 import Data.Scientific
 import Control.Exception (throw)
 import Network.HTTP.Req (responseBody)
@@ -13,6 +12,7 @@ import Control.Applicative ((<|>))
 import System.Environment (getArgs, getEnv)
 import qualified Text.Read as TR
 import qualified BOM
+import Formatting (fprint, (%), fixed, string)
 
 -- Octopart API docs state that at most 20 queries may be made in a single request.
 -- This program uses the smallest number of requests possible given this constraint.
@@ -34,13 +34,15 @@ main = do
   -- without consing. The alternative would be to V.concatMap using
   -- the vector representation, which would definitely require allocating
   -- a new vector.
-  responses <- concatMap (V.toList . O.unwrapResponses . responseBody)
-               <$> mapM (O.queryMpns apiKey) queries
+  responses <-
+    concatMap (V.toList . O.unwrapResponses . responseBody)
+    <$> mapM (O.queryMpns apiKey) queries
   bestPrices <-
     return $ map (\(quantity, offers) -> (bestTotalPrice (quantity * batchSize) offers)
                                          * (fromIntegral quantity) * (fromIntegral batchSize))
                  (zip (map BOM.quantity bomLines) responses)
-  print $ sum bestPrices
+  totalCost <- return $ (sum bestPrices)
+  fprint ((fixed 2) % string) totalCost "\n"
 
 bestTotalPrice :: Int -> V.Vector O.Offer -> Scientific
 bestTotalPrice n offers =
