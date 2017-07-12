@@ -15,6 +15,8 @@ csvTests =
       (TestCase (assertEqual "for one field" (csv [[ "foo" ]]) (p "foo")))
   , TestLabel "simpleSingleLine"
       (TestCase ((assertEqual "for multiple fields" (csv [[ "foo", "bar", "amp" ]]) (p "foo,bar,amp"))))
+  , TestLabel "simpleSingleLineWithWhitespaceAfterComma"
+      (TestCase ((assertEqual "for multiple fields with whitespace after comma" (csv [[ "foo", "bar", "amp" ]]) (p "foo, bar,\t amp"))))
   , TestLabel "multiLine"
       (TestCase ((assertEqual "for multiple lines" (csv [[ "foo", "bar", "amp" ], [ "10", "20", "30" ]]) (p "foo,bar,amp\n10,20,30"))))
   , TestLabel "simpleEscapedQuotes"

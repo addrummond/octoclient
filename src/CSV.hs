@@ -36,7 +36,8 @@ parse inp =
         currentLine = [ ],
         currentLines = [ ],
         afterQuote = False, -- We have just read '"', which may or may not be escaped by a subsequent '"'
-        inQuoted = False    -- The parser is currently within a quoted string
+        inQuoted = False,   -- The parser is currently within a quoted string
+        afterComma = False  -- The parser has just read a comma and now needs to skip any whitespace.
       })
       inp
 
@@ -48,6 +49,10 @@ comma :: Word8
 comma = fromIntegral (ord ',')
 dquote :: Word8
 dquote = fromIntegral (ord '"')
+space :: Word8
+space = fromIntegral (ord ' ')
+tab :: Word8
+tab = fromIntegral (ord '\t')
 
 -- Avoid adding a trailing empty line or empty field to the parse.
 tidy :: [[B.ByteString]] -> [[B.ByteString]]
@@ -77,6 +82,10 @@ addChar c s = s { currentField = c : (currentField s) }
 
 parse' :: State -> Word8 -> State
 parse' s c
+  | afterComma s =
+      if c == space || c == tab
+        then s
+        else parse' (s { afterComma = False }) c
   | afterQuote s =
       if c == dquote
         then (addChar c s) { afterQuote = False }
@@ -86,13 +95,13 @@ parse' s c
         }) c
   | inQuoted s =
       if c == dquote
-          then s { afterQuote = True }
-          else addChar c s
+        then s { afterQuote = True }
+        else addChar c s
   | c == dquote =
       if afterQuote s
-          then (addChar c s) { afterQuote = False }
-          else s { afterQuote = True }
-  | c == comma = addCurrentField s
+        then (addChar c s) { afterQuote = False }
+        else s { afterQuote = True }
+  | c == comma = (addCurrentField s) { afterComma = True }
   | c == cr = s -- We simply ignore '\r'. This is fine as long as the input is well-formed.
   | c == nl = addCurrentLine s
   | True = addChar c s
@@ -102,5 +111,6 @@ data State = State {
   currentLine :: [B.ByteString],
   currentLines :: [[B.ByteString]],
   afterQuote :: Bool,
-  inQuoted :: Bool
+  inQuoted :: Bool,
+  afterComma :: Bool
 } deriving Show
