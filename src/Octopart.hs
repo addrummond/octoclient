@@ -24,7 +24,7 @@ import qualified Data.Vector as V
 -- be exactly represented in the smallest units of a given currency.
 -- For this reason I am using Scientific values to represent monetary values.
 -- (This is more convenient than using e.g. Rational because Data.Aeson uses
--- Scentific to represent JSON number literals.)
+-- Scientific to represent JSON number literals.)
 
 data Offer = Offer {
   seller :: T.Text,
