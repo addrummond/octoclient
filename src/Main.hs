@@ -60,7 +60,7 @@ main = do
   fprint ((fixed 2) % string % (fixed 1) % string) bestPrice " USD\nBOM coverage: " coverage "%\n"
 
 sumPrices :: Int -> (Scientific, [BOM.BomLine]) -> V.Vector O.Offer -> (Scientific, [BOM.BomLine])
-sumPrices batchSize x@(total, []) _ = x
+sumPrices batchSize x@(_, []) _ = x
 sumPrices batchSize (total, line:rest) offers =
   (total + total', rest)
   where 
