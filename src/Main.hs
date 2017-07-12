@@ -37,12 +37,14 @@ main = do
   responses <-
     concatMap (V.toList . O.unwrapResponses . responseBody)
     <$> mapM (O.queryMpns apiKey) queries
+  responsesFor <- return $ length $ filter ((> 0) . length) responses
+  coverage <- return $ 100.0 * ((fromIntegral responsesFor) :: Double) / ((fromIntegral (length responses)) :: Double)
   bestPrices <-
     return $ map (\(quantity, offers) -> (bestTotalPrice (quantity * batchSize) offers)
                                          * (fromIntegral quantity) * (fromIntegral batchSize))
                  (zip (map BOM.quantity bomLines) responses)
   totalCost <- return $ (sum bestPrices)
-  fprint ((fixed 2) % string) totalCost " USD\n"
+  fprint ((fixed 2) % string % (fixed 1) % string) totalCost " USD\nBOM coverage: " coverage "%\n"
 
 bestTotalPrice :: Int -> V.Vector O.Offer -> Scientific
 bestTotalPrice n offers =
