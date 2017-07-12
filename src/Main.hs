@@ -5,6 +5,7 @@ import qualified Octopart as O
 import qualified Data.Text as T
 import qualified Data.ByteString as B
 import qualified Data.Vector as V
+import Data.Vector ((!))
 import Data.Scientific
 import Control.Exception (throw)
 import Network.HTTP.Req (responseBody)
@@ -29,22 +30,25 @@ main = do
   bomLines <- liftEither $ BOM.fromCsv csvContents
   partNumbers <- return $ map BOM.partNumber bomLines
   queries <- return $ groupN octopartMaxQueries partNumbers
-  -- At this point we convert the vector of vectors of query responses
-  -- to a list of query responses, since we're going to loop through
-  -- without consing. The alternative would be to V.concatMap using
-  -- the vector representation, which would definitely require allocating
-  -- a new vector.
   responses <-
-    concatMap (V.toList . O.unwrapResponses . responseBody)
+    map (O.unwrapResponses . responseBody)
     <$> mapM (O.queryMpns apiKey) queries
-  responsesFor <- return $ length $ filter ((> 0) . length) responses
-  coverage <- return $ 100.0 * ((fromIntegral responsesFor) :: Double) / ((fromIntegral (length responses)) :: Double)
-  bestPrices <-
-    return $ map (\(quantity, offers) -> (bestTotalPrice (quantity * batchSize) offers)
-                                         * (fromIntegral quantity) * (fromIntegral batchSize))
-                 (zip (map BOM.quantity bomLines) responses)
-  totalCost <- return $ (sum bestPrices)
-  fprint ((fixed 2) % string % (fixed 1) % string) totalCost " USD\nBOM coverage: " coverage "%\n"
+  responsesFor <-
+    return $ sum $ map (V.foldl' (\count -> \v -> count + (if V.length v > 0 then 1 else 0)) 0) responses
+  coverage <-
+    return $ 100.0 * ((fromIntegral responsesFor) :: Double) / ((fromIntegral (length bomLines)) :: Double)
+  bestPrice <-
+    return $ sum $ map (fst . (V.foldl' (sumPrices batchSize) (0.0, bomLines))) responses
+  fprint ((fixed 2) % string % (fixed 1) % string) bestPrice " USD\nBOM coverage: " coverage "%\n"
+
+sumPrices :: Int -> (Scientific, [BOM.BomLine]) -> V.Vector O.Offer -> (Scientific, [BOM.BomLine])
+sumPrices batchSize x@(total, []) _ = x
+sumPrices batchSize (total, line:rest) offers =
+  (total + total', rest)
+  where 
+    total' = (bestTotalPrice (quantity * batchSize) offers) *
+             (fromIntegral quantity) * (fromIntegral batchSize)
+    quantity = BOM.quantity line
 
 bestTotalPrice :: Int -> V.Vector O.Offer -> Scientific
 bestTotalPrice n offers =

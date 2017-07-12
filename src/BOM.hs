@@ -1,4 +1,4 @@
-module BOM (fromCsv, manafacturer, partNumber, quantity) where
+module BOM (fromCsv, BomLine(..)) where
 
 import qualified CSV
 import qualified Data.ByteString as B
