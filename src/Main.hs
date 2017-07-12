@@ -16,7 +16,7 @@ import Formatting (fprint, (%), fixed, string)
 
 -- Octopart API docs state that at most 20 queries may be made in a single request.
 -- This program uses the smallest number of requests possible given this constraint.
-octopart_max_queries = 20
+octopartMaxQueries = 20
 
 usage = "Program must be given two arguments: filename and batch size (integer >= 1)"
 
@@ -28,7 +28,7 @@ main = do
   csvContents <- B.readFile filename
   bomLines <- liftEither $ BOM.fromCsv csvContents
   partNumbers <- return $ map BOM.partNumber bomLines
-  queries <- return $ groupN octopart_max_queries partNumbers
+  queries <- return $ groupN octopartMaxQueries partNumbers
   -- At this point we convert the vector of vectors of query responses
   -- to a list of query responses, since we're going to loop through
   -- without consing. The alternative would be to V.concatMap using
@@ -42,7 +42,7 @@ main = do
                                          * (fromIntegral quantity) * (fromIntegral batchSize))
                  (zip (map BOM.quantity bomLines) responses)
   totalCost <- return $ (sum bestPrices)
-  fprint ((fixed 2) % string) totalCost "\n"
+  fprint ((fixed 2) % string) totalCost " USD\n"
 
 bestTotalPrice :: Int -> V.Vector O.Offer -> Scientific
 bestTotalPrice n offers =
