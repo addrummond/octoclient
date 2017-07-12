@@ -35,5 +35,11 @@ parseArgs args
 
 usage = "Program must be given two arguments: filename and batch size (integer >= 1)"
 
+-- Given an integer i, splits a list l into the smallest list of sublists l'
+-- such that (a) concat l' == l and (b) each member of l' is of length <= i.
+groupN :: Int -> [a] -> [[a]]
+groupN _ [ ] = [ ]
+groupN i l = firstN : (groupN i rest) where (firstN, rest) = splitAt i l
+
 liftEither :: Either String a -> IO a
 liftEither = either fail return
