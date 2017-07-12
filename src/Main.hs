@@ -23,10 +23,13 @@ parseArgs :: [String] -> Either String (String, Int)
 parseArgs args
   | length args /= 2 = Left usage
   | True = case TR.reads (args !! 1) of
-             [(n,"")] -> Right ((args !! 0), n)
+             [(n,"")] ->
+               if n <= 0
+                 then Left usage
+                 else Right ((args !! 0), n)
              _ -> Left usage
 
-usage = "Program must be given two arguments: filename and batch size (integer)"
+usage = "Program must be given two arguments: filename and batch size (integer >= 1)"
 
 liftEither :: Either String a -> IO a
 liftEither = either fail return
