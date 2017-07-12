@@ -30,9 +30,10 @@ partNumberHeading = C8.pack "partNumber"
 quantityHeading = C8.pack "quantity"
 
 checkHeader :: [B.ByteString] -> Either String ()
-checkHeader [a,b,c] = if a == manfacturerHeading && b == partNumberHeading && c == quantityHeading
-                        then Right ()
-                        else Left "Unexpected header in BOM CSV file"
+checkHeader [a,b,c] =
+  if a == manfacturerHeading && b == partNumberHeading && c == quantityHeading
+    then Right ()
+    else Left "Unexpected header in BOM CSV file"
 checkHeader _ = Left "Unexpected header in BOM CSV file"
 
 -- This returns a list of BomLine records so that we can deal
