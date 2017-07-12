@@ -20,9 +20,9 @@ import Data.Char (ord)
 -- likely to be some room for improvement with regard to performance.
 --
 -- The parser assumes that the input is well-formed, and is permissive
--- in what it accepts. Some strings are not valid CSV (e.g. the RFC
--- does not allow unquoted whitespace within fields). However, in practice,
--- so many CSV files violate these sorts of constraints that there is
+-- in what it accepts. It is possible for a strings not to be valid CSV (e.g.
+-- the RFC does not allow unquoted whitespace within fields). However, in
+-- practice, so many CSV files violate these sorts of constraints that there is
 -- little to be gained by signaling errors.
 --
 
