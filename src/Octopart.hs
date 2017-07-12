@@ -1,4 +1,4 @@
-module Octopart (queryMpns, Responses) where
+module Octopart (queryMpns, Responses(..), Offer(..), unwrapResponses) where
 
 import qualified Data.Text as T
 import qualified Data.Text.Lazy as TL
@@ -94,6 +94,7 @@ parseResponses = withObject "response" $ \o -> do
   mapM resultToOffers results
 
 newtype Responses = Responses (V.Vector (V.Vector Offer)) deriving Show
+unwrapResponses (Responses rs) = rs
 
 instance FromJSON Responses where
   parseJSON x = fmap Responses (parseResponses x)
