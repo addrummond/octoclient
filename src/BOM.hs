@@ -1,4 +1,4 @@
-module BOM (fromCsv, BomLine(..)) where
+module BOM (fromCsv, BOMLine(..)) where
 
 import qualified CSV
 import qualified Data.ByteString as B
@@ -10,16 +10,16 @@ import Control.Monad.Extra (concatMapM)
 import Text.Printf (printf)
 import Debug.Trace
 
-data BomLine = BomLine {
+data BOMLine = BOMLine {
   manafacturer :: T.Text,
   partNumber :: T.Text,
   quantity :: Int
 }
 
-fromCsv :: B.ByteString -> Either String [BomLine]
+fromCsv :: B.ByteString -> Either String [BOMLine]
 fromCsv input = fromCsv' $ CSV.parse input
 
-fromCsv' :: [[B.ByteString]] -> Either String [BomLine]
+fromCsv' :: [[B.ByteString]] -> Either String [BOMLine]
 fromCsv' [] = Left "Empty BOM CSV file"
 fromCsv' (header:lines) = do
   checkHeader header
@@ -36,10 +36,10 @@ checkHeader [a,b,c] =
     else Left "Unexpected header in BOM CSV file"
 checkHeader _ = Left "Unexpected header in BOM CSV file"
 
--- This returns a list of BomLine records so that we can deal
+-- This returns a list of BOMLine records so that we can deal
 -- with the case where the quantity is 0 (in which case we
 -- just ignore the relevant line in the BOM).
-lineToBom :: (Int, [B.ByteString]) -> Either String [BomLine]
+lineToBom :: (Int, [B.ByteString]) -> Either String [BOMLine]
 lineToBom (lineNumber, [manafacturer, partNumber, quantity]) =
   case reads (C8.unpack quantity) of -- C8.unpack is ok here, as any valid number will be ASCII only
     [(quantity, "")] ->
@@ -47,6 +47,6 @@ lineToBom (lineNumber, [manafacturer, partNumber, quantity]) =
             then Left (printf "Line %i: Quantity must be an integer >= 0" lineNumber)
             else if quantity == 0
                 then Right [ ]
-                else Right [BomLine (TE.decodeUtf8 manafacturer) (TE.decodeUtf8 partNumber) quantity]
+                else Right [BOMLine (TE.decodeUtf8 manafacturer) (TE.decodeUtf8 partNumber) quantity]
     _ -> Left (printf "Line %i: Quantity (third column) must be an integer" lineNumber)
 lineToBom (lineNumber, _) = Left (printf "Line %i: Each line in BOM must have three columns" lineNumber)

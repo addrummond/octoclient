@@ -27,7 +27,7 @@ main = do
   apiKey <- (T.pack <$> getEnv "OCTOPART_API_KEY")
             <|> fail "You must define the environment variable OCTOPART_API_KEY before running this program"
 
-  -- Read the CSV file and parse it to [BOM.BomLine]
+  -- Read the CSV file and parse it to [BOM.BOMLine]
   csvContents <- B.readFile filename
   bomLines <- liftEither $ BOM.fromCsv csvContents
   partNumbers <- return $ map BOM.partNumber bomLines
@@ -59,7 +59,7 @@ main = do
   -- Output the total and BOM coverage.
   fprint ((fixed 2) % string % (fixed 1) % string) bestPrice " USD\nBOM coverage: " coverage "%\n"
 
-sumBestPrices :: Int -> (Scientific, [BOM.BomLine]) -> V.Vector O.Offer -> (Scientific, [BOM.BomLine])
+sumBestPrices :: Int -> (Scientific, [BOM.BOMLine]) -> V.Vector O.Offer -> (Scientific, [BOM.BOMLine])
 sumBestPrices batchSize x@(_, []) _ = x
 sumBestPrices batchSize (total, line:rest) offers =
   (total + total', rest)
