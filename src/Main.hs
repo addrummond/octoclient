@@ -22,7 +22,7 @@ usage = "Program must be given two arguments: filename and batch size (integer >
 
 main :: IO ()
 main = do
-  -- Check that require cmd line args and env vars are present.
+  -- Check that required cmd line args and env vars are present.
   (filename, batchSize) <- (parseArgs <$> getArgs) >>= liftEither
   apiKey <- (T.pack <$> getEnv "OCTOPART_API_KEY")
             <|> fail "You must define the environment variable OCTOPART_API_KEY before running this program"
