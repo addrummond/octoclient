@@ -42,6 +42,41 @@ parse inp =
       })
       inp
 
+parse' :: State -> Word8 -> State
+parse' s c
+  | afterComma s =
+      if c == space || c == tab
+        then s
+        else parse' (s { afterComma = False }) c
+  | afterQuote s =
+      if c == dquote
+        then (addChar c s) { afterQuote = False }
+        else parse' (s {
+          inQuoted = not (inQuoted s),
+          afterQuote = False
+        }) c
+  | inQuoted s =
+      if c == dquote
+        then s { afterQuote = True }
+        else addChar c s
+  | c == dquote =
+      if afterQuote s
+        then (addChar c s) { afterQuote = False }
+        else s { afterQuote = True }
+  | c == comma = (addCurrentField s) { afterComma = True }
+  | c == cr = s -- We simply ignore '\r'. This is fine as long as the input is well-formed.
+  | c == nl = addCurrentLine s
+  | True = addChar c s
+
+data State = State {
+  currentField :: BB.Builder,
+  currentLine :: [B.ByteString],
+  currentLines :: [[B.ByteString]],
+  afterQuote :: Bool,
+  inQuoted :: Bool,
+  afterComma :: Bool
+}
+
 cr :: Word8
 cr = fromIntegral (ord '\r')
 nl :: Word8
@@ -80,38 +115,3 @@ addCurrentLine s =
 
 addChar :: Word8 -> State -> State
 addChar c s = s { currentField = mappend (currentField s) (BB.byte c) }
-
-parse' :: State -> Word8 -> State
-parse' s c
-  | afterComma s =
-      if c == space || c == tab
-        then s
-        else parse' (s { afterComma = False }) c
-  | afterQuote s =
-      if c == dquote
-        then (addChar c s) { afterQuote = False }
-        else parse' (s {
-          inQuoted = not (inQuoted s),
-          afterQuote = False
-        }) c
-  | inQuoted s =
-      if c == dquote
-        then s { afterQuote = True }
-        else addChar c s
-  | c == dquote =
-      if afterQuote s
-        then (addChar c s) { afterQuote = False }
-        else s { afterQuote = True }
-  | c == comma = (addCurrentField s) { afterComma = True }
-  | c == cr = s -- We simply ignore '\r'. This is fine as long as the input is well-formed.
-  | c == nl = addCurrentLine s
-  | True = addChar c s
-
-data State = State {
-  currentField :: BB.Builder,
-  currentLine :: [B.ByteString],
-  currentLines :: [[B.ByteString]],
-  afterQuote :: Bool,
-  inQuoted :: Bool,
-  afterComma :: Bool
-}
