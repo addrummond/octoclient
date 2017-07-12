@@ -1,4 +1,4 @@
-module BOM (fromCsv) where
+module BOM (fromCsv, manafacturer, partNumber, quantity) where
 
 import qualified CSV
 import qualified Data.ByteString as B
@@ -8,6 +8,7 @@ import qualified Data.Text as T
 import qualified Text.Read as TR
 import Control.Monad.Extra (concatMapM)
 import Text.Printf (printf)
+import Debug.Trace
 
 data BomLine = BomLine {
   manafacturer :: T.Text,
@@ -24,7 +25,7 @@ fromCsv' (header:lines) = do
   checkHeader header
   concatMapM lineToBom (zip [1..] lines)
 
-manfacturerHeading = C8.pack "manafacturer"
+manfacturerHeading = C8.pack "manufacturer"
 partNumberHeading = C8.pack "partNumber"
 quantityHeading = C8.pack "quantity"
 
@@ -32,6 +33,7 @@ checkHeader :: [B.ByteString] -> Either String ()
 checkHeader [a,b,c] = if a == manfacturerHeading && b == partNumberHeading && c == quantityHeading
                         then Right ()
                         else Left "Unexpected header in BOM CSV file"
+checkHeader _ = Left "Unexpected header in BOM CSV file"
 
 -- This returns a list of BomLine records so that we can deal
 -- with the case where the quantity is 0 (in which case we
