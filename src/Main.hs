@@ -24,8 +24,9 @@ main :: IO ()
 main = do
   -- Check that required cmd line args and env vars are present.
   (filename, batchSize) <- (parseArgs <$> getArgs) >>= liftEither
-  apiKey <- (T.pack <$> getEnv "OCTOPART_API_KEY")
-            <|> fail "You must define the environment variable OCTOPART_API_KEY before running this program"
+  apiKey <-
+    (T.pack <$> getEnv "OCTOPART_API_KEY")
+    <|> fail "You must define the environment variable OCTOPART_API_KEY before running this program"
 
   -- Read the CSV file and parse it to [BOM.BOMLine]
   csvContents <- B.readFile filename

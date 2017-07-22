@@ -20,7 +20,7 @@ import qualified Data.Vector as V
 -- There are well-known issues with representing monetary values
 -- using floating point numbers. For this application, it would not
 -- be appropriate to model monetary values as integers either, since
--- manafacturers/distributors may in some cases have prices that cannot
+-- manufacturer/distributors may in some cases have prices that cannot
 -- be exactly represented in the smallest units of a given currency.
 -- For this reason I am using Scientific values to represent monetary values.
 -- (This is more convenient than using e.g. Rational because Data.Aeson uses
